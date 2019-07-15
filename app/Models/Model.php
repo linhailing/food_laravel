@@ -92,4 +92,10 @@ class Model extends DB{
         if (!self::$product) self::$product = new Product();
         return self::$product;
     }
+    //美食信息
+    private static $food;
+    public static function Food(){
+        if (!self::$food) self::$food = new Food();
+        return self::$food;
+    }
 }

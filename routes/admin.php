@@ -9,6 +9,16 @@ Route::namespace('Admin')->middleware(['web'])->group(function () {
 });
 
 Route::namespace('Admin')->middleware('AdminMiddleware')->group(function (){
+    //美食管理
+    Route::get('/food', 'FoodController@index')->name('admin.food');
+    Route::any('/food/data', 'FoodController@getData')->name('admin.food.data');
+    Route::any('/food/store', 'FoodController@store')->name('admin.food.store');
+    Route::any('/food/del', 'FoodController@del')->name('admin.food.del');
+    Route::any('/food/cate', 'FoodController@cate')->name('admin.food.cate');
+    Route::any('/food/cate/store', 'FoodController@cateStore')->name('admin.food.cate.store');
+    Route::any('/food/cate/del', 'FoodController@cateDel')->name('admin.food.cate.del');
+
+
     Route::get('/', 'IndexController@index');
     Route::any('/index/data', 'IndexController@getData');
     Route::get('/welcome', 'WelcomeController@index')->name('admin.welcome');
