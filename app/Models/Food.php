@@ -9,6 +9,8 @@
 namespace App\Models;
 
 
+use Illuminate\Support\Facades\DB;
+
 class Food extends Model{
     public function insertFoodCat($data){
         return self::table('food_cat')->insert($data);
@@ -41,7 +43,7 @@ class Food extends Model{
     public function getFoodCate(){
         $query = self::table('food_cat');
         $query->where(['status'=>1]);
-        return $query->orderBy('id', 'desc')->get()->toArray();
+        return $query->orderBy('weight', 'desc')->get()->toArray();
     }
     public function getFood($id){
         return self::table('food')->where(['id'=>$id])->first();
@@ -54,6 +56,15 @@ class Food extends Model{
             $query->where('food.name', 'like' , '%'.$q.'%');
         }
         return $query->orderBy('food.id', 'desc')->paginate($limit)->toArray();
+    }
+    public function getFoodBanner($limit=3){
+        return self::table('food')->orderBy('total_count', 'desc')->limit($limit)->get()->toArray();
+    }
+    public function getFoodsByParams($params=[],$pageSize=10){
+        $query = self::table('food');
+        if (isset($params['cat_id']) && !empty($params['cat_id'])) $query->where(['cat_id'=>$params['cat_id']]);
+        if (isset($params['q']) && !empty($params['q'])) $query->where('name', 'like', "%".$params['q']."%")->orWhere('tags','like',"%".$params['q']."%");
+        return $query->orderBy('total_count', 'desc')->paginate($pageSize)->toArray();
     }
 
 }
