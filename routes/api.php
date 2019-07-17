@@ -23,4 +23,5 @@ Route::namespace('Api')->prefix('v1')->middleware(['api','cors'])->group(functio
     //food
     Route::get('/', 'FoodController@index');
     Route::get('/food/category', 'FoodController@category');
+    Route::get('/food/detail', 'FoodController@detail');
 });

@@ -132,7 +132,7 @@ Page({
     },
     toDetailsTap: function (e) {
         wx.navigateTo({
-            url: "/pages/food/info?id=" + e.currentTarget.dataset.id
+            url: "/pages/food/info?id=" + e.currentTarget.id
         });
     }
 });

@@ -36,6 +36,17 @@ class FoodController extends ApiController{
         ];
         return $this->json($data);
     }
+    public function detail(){
+        $id = $this->req('id', 0);
+        if (empty($id)) return $this->error('参数错误!', 201);
+        $info = Model::Food()->getFood($id);
+        //更新浏览量
+        Model::Food()->updateFoodViewCount($id);
+        $data = [
+            'info'=>$info
+        ];
+        return $this->json($data);
+    }
     public function category(){
         $category = Model::Food()->getFoodCate();
         $banners = Model::Food()->getFoodBanner(3);

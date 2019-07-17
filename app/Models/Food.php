@@ -48,6 +48,9 @@ class Food extends Model{
     public function getFood($id){
         return self::table('food')->where(['id'=>$id])->first();
     }
+    public function updateFoodViewCount($id){
+        return self::table('food')->where(['id'=>$id])->increment('view_count');
+    }
     public function getFoodParams($q, $limit){
         $query = self::table('food');
         $query->leftJoin('food_cat', 'food_cat.id', '=', 'food.cat_id');

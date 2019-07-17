@@ -1,8 +1,6 @@
 //index.js
 //获取应用实例
 var app = getApp();
-var WxParse = require('../../wxParse/wxParse.js');
-
 Page({
     data: {
         autoplay: true,
@@ -20,21 +18,14 @@ Page({
         shopCarNum: 4,
         commentCount:2
     },
-    onLoad: function () {
+    onLoad: function (options) {
+        let id = options.hasOwnProperty('id') ? options.id : 0
         var that = this;
-
         that.setData({
-            "info": {
-                "id": 1,
-                "name": "小鸡炖蘑菇",
-                "summary": '<p>多色可选的马甲</p><p><img src="http://www.timeface.cn/uploads/times/2015/07/071031_f5Viwp.jpg"/></p><p><br/>相当好吃了</p>',
-                "total_count": 2,
-                "comment_count": 2,
-                "stock": 2,
-                "price": "80.00",
-                "main_image": "/images/food.jpg",
-                "pics": [ '/images/food.jpg','/images/food.jpg' ]
-            },
+            id: id
+        })
+        that.getInfo(id)
+        that.setData({
             buyNumMax:2,
             commentList: [
                 {
@@ -56,9 +47,25 @@ Page({
                     }
                 }
             ]
+        })
+    },
+    getInfo(id){
+        let that = this
+        wx.request({
+            url: app.buildUrl("/v1/food/detail"),
+            header: app.getRequestHeader(),
+            data: {id: id},
+            success: function (res) {
+                var resp = res.data;
+                if (resp.code != 200) {
+                    app.alert({"content": resp.msg, 'title': '错误提示'});
+                    return;
+                }
+                that.setData({
+                    info: resp.results.info
+                })
+            }
         });
-
-        WxParse.wxParse('article', 'html', that.data.info.summary, that, 5);
     },
     goShopCar: function () {
         wx.reLaunch({
