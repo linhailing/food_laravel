@@ -37,7 +37,7 @@ App({
             success: function(res) {
                 if (res.confirm) {//用户点击确定
                     if( params.hasOwnProperty('cb_confirm') && typeof( params.cb_confirm ) == "function" ){
-                        params.cb_confirm();
+                        params.cb_confirm(params.hasOwnProperty('cb_confirm'));
                     }
                 }else{
                     if( params.hasOwnProperty('cb_cancel') && typeof( params.cb_cancel ) == "function" ){

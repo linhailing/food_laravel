@@ -69,5 +69,28 @@ class Food extends Model{
         if (isset($params['q']) && !empty($params['q'])) $query->where('name', 'like', "%".$params['q']."%")->orWhere('tags','like',"%".$params['q']."%");
         return $query->orderBy('total_count', 'desc')->paginate($pageSize)->toArray();
     }
-
+    public function insertMemberShare($data){
+        return self::table('wx_share_history')->insert($data);
+    }
+    public function insertMemberCart($data){
+        return self::table('member_cart')->insert($data);
+    }
+    public function checkMemberCart($uid=0,$food_id=0){
+        return self::table('member_cart')->where(['member_id'=>$uid, 'food_id'=>$food_id])->count();
+    }
+    public function updateMemberCartQuantity($uid=0,$food_id=0, $quantity=1){
+        return self::table('member_cart')->where(['member_id'=>$uid, 'food_id'=>$food_id])->increment('quantity',$quantity);
+    }
+    public function getMemberCartCount($uid=0){
+        return self::table('member_cart')->where(['member_id'=>$uid])->count();
+    }
+    public function getMemberCart($uid=0){
+        return self::table('member_cart')->where(['member_id'=>$uid])->get();
+    }
+    public function getMemberCartFood($uid=0){
+        $query = self::table('member_cart');
+        $query->select('member_cart.*','food.id as food_id','food.name','food.price','food.main_image');
+        $query->leftJoin('food','food.id','=','member_cart.food_id');
+        return $query->where(['member_cart.member_id'=>$uid])->get()->toArray();
+    }
 }

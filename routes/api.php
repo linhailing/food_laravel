@@ -24,4 +24,8 @@ Route::namespace('Api')->prefix('v1')->middleware(['api','cors'])->group(functio
     Route::get('/', 'FoodController@index');
     Route::get('/food/category', 'FoodController@category');
     Route::get('/food/detail', 'FoodController@detail');
+    //用户信息
+    Route::post('/member/share', 'MemberController@share');
+    Route::get('/member/cart', 'MemberController@member_cart_list');
+    Route::post('/member/cart_add', 'MemberController@member_cart_add');
 });

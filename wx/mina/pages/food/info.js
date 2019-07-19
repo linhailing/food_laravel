@@ -1,6 +1,7 @@
 //index.js
 //获取应用实例
 var app = getApp();
+let util = require('../../utils/util')
 Page({
     data: {
         autoplay: true,
@@ -10,13 +11,14 @@ Page({
         hideShopPopup: true,
         buyNumber: 1,
         buyNumMin: 1,
-        buyNumMax:1,
+        buyNumMax:10,
         canSubmit: false, //  选中时候是否允许加入购物车
         shopCarInfo: {},
         shopType: "addShopCar",//购物类型，加入购物车或立即购买，默认为加入购物车,
         id: 0,
-        shopCarNum: 4,
-        commentCount:2
+        shopCarNum: 0,
+        commentCount:2,
+        info: []
     },
     onLoad: function (options) {
         let id = options.hasOwnProperty('id') ? options.id : 0
@@ -24,9 +26,8 @@ Page({
         that.setData({
             id: id
         })
-        that.getInfo(id)
+        that.getInfo()
         that.setData({
-            buyNumMax:2,
             commentList: [
                 {
                     "score": "好评",
@@ -49,12 +50,36 @@ Page({
             ]
         })
     },
-    getInfo(id){
+    onShareAppMessage: function(){
+        let that = this
+        return {
+            title: that.data.info.name,
+            path: '/pages/food/info?id='+ that.data.info.id,
+            success: function (res) {
+                // 转发成功
+                wx.request({
+                    url: app.buildUrl("/member/share"),
+                    header: app.getRequestHeader(),
+                    method: 'POST',
+                    data: {
+                        url: util.getCurrentPageUrlWithArgs()
+                    },
+                    success: function (res) {
+
+                    }
+                });
+            },
+            fail: function (res) {
+                // 转发失败
+            }
+        }
+    },
+    getInfo(){
         let that = this
         wx.request({
             url: app.buildUrl("/v1/food/detail"),
             header: app.getRequestHeader(),
-            data: {id: id},
+            data: {id: that.data.id},
             success: function (res) {
                 var resp = res.data;
                 if (resp.code != 200) {
@@ -62,7 +87,8 @@ Page({
                     return;
                 }
                 that.setData({
-                    info: resp.results.info
+                    info: resp.results.info,
+                    shopCarNum: resp.results.cartNumber,
                 })
             }
         });
@@ -85,7 +111,31 @@ Page({
         this.bindGuiGeTap();
     },
     addShopCar: function () {
+        let that = this
+        let data = {
+            'food_id': that.data.info.id,
+            'quantity': that.data.buyNumber
+        }
+        wx.request({
+            url: app.buildUrl('/v1/member/cart_add'),
+            header: app.getRequestHeader(),
+            method: 'POST',
+            data: data,
+            success: function (res) {
+                var resp = res.data;
+                if (resp.code === 200){
+                    that.setData({
+                        hideShopPopup: true
+                    });
+                    app.alert({"content": resp.results.msg,'cb_confirm': function () {
+                            that.getInfo()
+                        }});
+                }else{
+                    app.alert({"content": resp.msg});
+                }
 
+            }
+        })
     },
     buyNow: function () {
         wx.navigateTo({

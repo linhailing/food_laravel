@@ -1,7 +1,9 @@
 //index.js
 var app = getApp();
 Page({
-    data: {},
+    data: {
+        list: []
+    },
     onLoad: function () {
         this.getCartList();
     },
@@ -99,7 +101,7 @@ Page({
             if ( !list[i].active) {
                 continue;
             }
-            totalPrice = totalPrice + parseFloat( list[i].price );
+            totalPrice = totalPrice + (parseFloat( list[i].price ) * parseInt(list[i].number));
         }
         return totalPrice;
     },
@@ -138,32 +140,52 @@ Page({
         //发送请求到后台删除数据
     },
     getCartList: function () {
-        this.setData({
-            list: [
-                {
-                    "id": 1080,
-					"food_id":"5",
-                    "pic_url": "/images/food.jpg",
-                    "name": "小鸡炖蘑菇-1",
-                    "price": "85.00",
-                    "active": true,
-                    "number": 1
-                },
-                {
-                    "id": 1081,
-					"food_id":"6",
-                    "pic_url": "/images/food.jpg",
-                    "name": "小鸡炖蘑菇-2",
-                    "price": "85.00",
-                    "active": true,
-                    "number": 1
+        // this.setData({
+        //     list: [
+        //         {
+        //             "id": 1080,
+			// 		"food_id":"5",
+        //             "pic_url": "/images/food.jpg",
+        //             "name": "小鸡炖蘑菇-1",
+        //             "price": "85.00",
+        //             "active": true,
+        //             "number": 1
+        //         },
+        //         {
+        //             "id": 1081,
+			// 		"food_id":"6",
+        //             "pic_url": "/images/food.jpg",
+        //             "name": "小鸡炖蘑菇-2",
+        //             "price": "85.00",
+        //             "active": true,
+        //             "number": 1
+        //         }
+        //     ],
+        //     saveHidden: true,
+        //     totalPrice: "85.00",
+        //     allSelect: true,
+        //     noSelect: false,
+        // });
+        // this.setPageData( this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), this.data.list);
+        let that = this
+        wx.request({
+            url: app.buildUrl('/v1/member/cart'),
+            header: app.getRequestHeader(),
+            success: function (res) {
+                var resp = res.data;
+                if (resp.code != 200) {
+                    app.alert({"content": resp.msg});
+                    return;
                 }
-            ],
-            saveHidden: true,
-            totalPrice: "85.00",
-            allSelect: true,
-            noSelect: false,
-        });
-        this.setPageData( this.getSaveHide(), this.totalPrice(), this.allSelect(), this.noSelect(), this.data.list);
+                that.setData({
+                    list:resp.results.list,
+                    saveHidden: true,
+                    totalPrice: 0.00,
+                    allSelect: true,
+                    noSelect: false
+                });
+                that.setPageData( that.getSaveHide(), that.totalPrice(), that.allSelect(), that.noSelect(), that.data.list);
+            }
+        })
     }
 });
