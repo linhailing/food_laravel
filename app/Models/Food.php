@@ -93,4 +93,35 @@ class Food extends Model{
         $query->leftJoin('food','food.id','=','member_cart.food_id');
         return $query->where(['member_cart.member_id'=>$uid])->get()->toArray();
     }
+    public function updateMemberCartQuantityById($uid=0,$id=0, $quantity=1){
+        $data = [];
+        $data['quantity'] = $quantity;
+        return self::table('member_cart')->where(['member_id'=>$uid, 'id'=>$id])->update($data);
+    }
+    public function delMemberCartByIds($uid=0, $ids = []){
+        return self::table('member_cart')->where('member_id',$uid)->whereIn('id', $ids)->delete();
+    }
+    public function delMemberCartByFoodId($uid=0, $ids = []){
+        return self::table('member_cart')->where('member_id',$uid)->whereIn('food_id', $ids)->delete();
+    }
+    public function getFoodByInId($id=[]){
+        return self::table('food')->whereIn('id', $id)->get()->toArray();
+    }
+    public function getFoodByInIdsForUpdate($id=[]){
+       return self::table('food')->whereIn('id', $id)->lockForUpdate()->get();
+    }
+    public function insertPayOrder($data){
+        return self::table('pay_order')->insertGetId($data);
+    }
+    public function insertPayOrderItem($data){
+        return self::table('pay_order_item')->insert($data);
+    }
+
+    //减去库存
+    public function updateFoodStock($id, $stock=0){
+        $data = [];
+        $data['stock'] = $stock;
+        return self::table('food')->where(['id'=>$id])->update($data);
+    }
+
 }

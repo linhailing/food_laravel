@@ -6,6 +6,7 @@
  * @package  Laravel
  * @author   Taylor Otwell <taylor@laravel.com>
  */
+ini_set('date.timezone','Asia/Shanghai');
 
 define('LARAVEL_START', microtime(true));
 

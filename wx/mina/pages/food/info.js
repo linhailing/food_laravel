@@ -117,7 +117,7 @@ Page({
             'quantity': that.data.buyNumber
         }
         wx.request({
-            url: app.buildUrl('/v1/member/cart_add'),
+            url: app.buildUrl('/v1/cart/cart_add'),
             header: app.getRequestHeader(),
             method: 'POST',
             data: data,
