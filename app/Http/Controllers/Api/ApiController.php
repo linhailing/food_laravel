@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Api\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Libs\Util;
+use Illuminate\Http\Request;
 
 class ApiController extends Controller {
     protected $token = '';
@@ -14,11 +15,11 @@ class ApiController extends Controller {
     protected $income = null;
     protected $pageSize = 10;
     use ApiResponse;
-    public function __construct(){
+    public function __construct(Request $request){
         @define('TIMESTAMP', time());
         @define('DATETIME', date('Y-m-d H:i:s', TIMESTAMP));
         //token
-        $this->token = $this->req('token');
+        $this->token = $this->req('token') ? $this->req('token'):  $request->header('Authorization');
         if (!empty($this->token)) $this->income = Util::up_decode($this->token);
         if (!empty($this->income)) $this->uid = isset($this->income['u']) ? $this->income['u'] : 0;
     }
@@ -64,5 +65,12 @@ class ApiController extends Controller {
         $size = intval(ceil(count($data) / $this->pageSize));
         $temp = array_slice($data , $start, $this->pageSize);
         return ['size' => $size, 'currentPage' => $page -1, 'total'=> $total, 'list' => $temp];
+    }
+    public function buildUrl( $path ){
+        return $path;
+    }
+    public function buildImageUrl( $path ){
+        $url = $GLOBALS['domain'].$path;
+        return $url;
     }
 }

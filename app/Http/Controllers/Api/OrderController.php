@@ -10,6 +10,7 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Libs\Util;
+use App\Libs\WeChatPay;
 use App\Models\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +59,7 @@ class OrderController extends ApiController{
     //create order
     public function createOrder(Request $request){
         //创建订单
-        $uid = $this->uid ?? 1;
+        $uid = $this->uid ?? 0;
         $type = $this->req('type', '');
         $note = $this->req('note', '');
         $yun_price = $this->req('yun_price', 0);
@@ -194,5 +195,68 @@ class OrderController extends ApiController{
             return $result;
         }
         return $result;
+    }
+
+    //订单支付
+    public function orderPay(){
+        $uid = $this->uid ?? 0;
+        $order_sn = $this->req('order_sn', 0);
+        if (empty($order_sn)) return $this->error('系统繁忙。请稍后再试~~', 210);
+        $orderPay = Model::Food()->getOrderPayByOrderSnUid($uid, $order_sn);
+        if (empty($orderPay)) return $this->error('系统繁忙。请稍后再试~~', 210);
+        //获取个人oppid
+        $notify_url = $GLOBALS['domain_api'] . $GLOBALS['mina_app']['callback_url'];
+        //微信支付
+        $target_wechat = new WeChatPay();
+        $data = [
+            'appid' => $GLOBALS['mina_app']['appid'],
+            'mch_id'=> $GLOBALS['mina_app']['mch_id'],
+            'nonce_str'=> Util::randCode(32),
+            'body'=> '订餐',  # 商品描述
+            'out_trade_no'=> $orderPay->order_sn,  # 商户订单号
+            'total_fee'=> intval( $orderPay->total_price * 100 ),
+            'notify_url'=> $notify_url,
+            'trade_type'=> "JSAPI",
+            'openid'=> '1233455555'
+        ];
+        $pay_info = $target_wechat->get_pay_info($data);
+        if (empty($pay_info)) return $this->error('系统繁忙。请稍后再试~~', 210);
+        if ($pay_info['code'] != 200){
+            return $this->error($pay_info['msg'], 210);
+        }
+        return $this->json($pay_info);
+    }
+    //支付回调
+    public function orderCallback(){
+        $resp = [
+            'return_code'=> 'SUCCESS',
+            'return_msg'=> 'OK'
+        ];
+        $result_data = file_get_contents('php://input');
+        $target_wechat = new WeChatPay();
+        if (empty($result_data)){
+            $resp['return_code'] = $resp['return_msg'] = 'FAIL';
+            return $target_wechat->data_to_xml($resp);
+        }
+        $xmlToArr = $target_wechat->dataFromXml($result_data);
+        if (empty($xmlToArr)){
+            $resp['return_code'] = $resp['return_msg'] = 'FAIL';
+            return $target_wechat->data_to_xml($resp);
+        }
+        $sign = $xmlToArr['sign'] ?? '';
+        //del sign
+        unset($xmlToArr['sign']);
+        $gene_sign = $target_wechat->create_sign($xmlToArr);
+        if ($sign !== $gene_sign){
+            $resp['return_code'] = $resp['return_msg'] = 'FAIL';
+            return $target_wechat->data_to_xml($resp);
+        }
+        if (($xmlToArr['return_code'] != 'SUCCESS') || ($xmlToArr['result_code'] != 'SUCCESS') ){
+            $resp['return_code'] = $resp['return_msg'] = 'FAIL';
+            return $target_wechat->data_to_xml($resp);
+        }
+        //一下操作修改订单
+        dd($xmlToArr);
+        return $this->json($resp);
     }
 }

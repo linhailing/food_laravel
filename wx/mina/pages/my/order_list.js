@@ -28,41 +28,48 @@ Page({
     },
     onShow: function () {
         var that = this;
-        that.setData({
-            order_list: [
-                {
-					status: -8,
-                    status_desc: "待支付",
-                    date: "2018-07-01 22:30:23",
-                    order_number: "20180701223023001",
-                    note: "记得周六发货",
-                    total_price: "85.00",
-                    goods_list: [
-                        {
-                            pic_url: "/images/food.jpg"
-                        },
-                        {
-                            pic_url: "/images/food.jpg"
-                        }
-                    ]
+        that.getMyOrderList()
+    },
+    toPay: function(e){
+        let order_sn = e.currentTarget.dataset.id
+        let that = this
+        wx.request({
+            url: app.buildUrl('/v1/order/pay'),
+            header: app.getRequestHeader(),
+            method: 'POST',
+            data: {
+                'order_sn': order_sn
+            },
+            success: function (res) {
+                let resp = res.data;
+                if (resp.code != 200) {
+                    app.alert({"content": resp.msg});
+                    return;
                 }
-            ]
-        });
+                app.console(resp)
+            }
+        })
     },
-    onHide: function () {
-        // 生命周期函数--监听页面隐藏
-
-    },
-    onUnload: function () {
-        // 生命周期函数--监听页面卸载
-
-    },
-    onPullDownRefresh: function () {
-        // 页面相关事件处理函数--监听用户下拉动作
-
-    },
-    onReachBottom: function () {
-        // 页面上拉触底事件的处理函数
-
+    getMyOrderList: function () {
+        app.loading();
+        let that = this
+        let status = that.data.status[that.data.currentType]
+        let data = {'status': status}
+        wx.request({
+            url: app.buildUrl('/v1/my/order'),
+            data:data,
+            header:app.getRequestHeader(),
+            success: function (res) {
+                app.hideLoading()
+                var resp = res.data;
+                if (resp.code != 200) {
+                    app.alert({"content": resp.msg});
+                    return;
+                }
+                that.setData({
+                    order_list:resp.results.order_list,
+                });
+            }
+        })
     }
 })

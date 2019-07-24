@@ -26,6 +26,9 @@ Route::namespace('Api')->prefix('v1')->middleware(['api','cors'])->group(functio
     Route::get('/food/detail', 'FoodController@detail');
     //用户信息
     Route::post('/member/share', 'MemberController@share');
+    Route::any('/my/order', 'MemberController@orderList');
+
+    //cart
     Route::get('/cart', 'CartController@index');
     Route::post('/cart/cart_add', 'CartController@cart_add');
     Route::post('/cart/set', 'CartController@cart_set');
@@ -33,4 +36,6 @@ Route::namespace('Api')->prefix('v1')->middleware(['api','cors'])->group(functio
     //order
     Route::post('/order/info', 'OrderController@info');
     Route::post('/order/createOrder', 'OrderController@createOrder');
+    Route::post('/order/pay', 'OrderController@orderPay');
+    Route::any('/order/callback', 'OrderController@orderCallback');
 });

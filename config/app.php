@@ -37,6 +37,27 @@ $GLOBALS['jiamengshuo_server'] = [
     'appsecret'=> 'b4dd631976150ccc37adbc8414411382',
 ];
 
+$GLOBALS['domain'] = 'http://192.168.1.177:9997';
+$GLOBALS['domain_api'] = 'http://192.168.1.177:9997/api/';
+
+$GLOBALS['mina_app'] = [
+    'appid' => 'wx360d7b8ff0881fd3',
+    'appkey' => 'xxxxxxxxxxxxx换自己的',
+    'paykey' => '4pz4ysdgei1a213amabrmmg32mc0ne4i',
+    'mch_id' =>'xxxxxxxxxxxx换自己的',
+    'callback_url' => '/vi/order/callback'
+];
+
+//支付状态
+$GLOBALS['pay_status'] = [
+    "0"=>"订单关闭",
+    "1"=>"支付成功",
+    "-8"=>"待支付",
+    "-7"=>"待发货",
+    "-6"=>"待确认",
+    "-5"=>"待评价"
+];
+
 return [
 
     /*

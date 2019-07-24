@@ -113,6 +113,9 @@ class Food extends Model{
     public function insertPayOrder($data){
         return self::table('pay_order')->insertGetId($data);
     }
+    public function getPayOrderByStatus($uid=0, $status=0,$express_status=0,$comment_status=0){
+        return self::table('pay_order')->where(['member_id'=>$uid, 'status'=>$status,'express_status'=>$express_status,'comment_status'=>$comment_status])->orderBy('id', 'desc')->get()->toArray();
+    }
     public function insertPayOrderItem($data){
         return self::table('pay_order_item')->insert($data);
     }
@@ -122,6 +125,16 @@ class Food extends Model{
         $data = [];
         $data['stock'] = $stock;
         return self::table('food')->where(['id'=>$id])->update($data);
+    }
+
+    public function getPayOrderItemFoodByOrderIds($pay_order_ids=[]){
+        $query = self::table('pay_order_item');
+        $query->select('pay_order_item.*', 'food.main_image');
+        $query->leftJoin('food', 'food.id','=','pay_order_item.food_id');
+        return $query->whereIn('pay_order_item.pay_order_id', $pay_order_ids)->orderBy('pay_order_item.id', 'desc')->get()->toArray();
+    }
+    public function getOrderPayByOrderSnUid($uid = 0, $order_sn=0){
+        return self::table('pay_order')->where(['member_id'=>$uid, 'order_sn'=>$order_sn])->first();
     }
 
 }

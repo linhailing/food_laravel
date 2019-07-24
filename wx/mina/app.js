@@ -47,12 +47,22 @@ App({
             }
         })
     },
+    loading: function(params={}){
+        let title = params.hasOwnProperty('title') ? params['title'] : '加载中...'
+        wx.showLoading({
+            title: title,
+        })
+    },
+    hideLoading: function(){
+       wx.hideLoading()
+    },
     console:function( msg ){
         console.log( msg);
     },
     getRequestHeader:function(){
         return {
-            'content-type': 'application/x-www-form-urlencoded'
+            'content-type': 'application/x-www-form-urlencoded',
+            'Authorization': 'a7vn9RWikyuQrMNGvM2Dn8Ugd3pmE8mngOKIVvs6ZUfEmLw37blKwtv9ASst7D0pjkx.phrtJR2JlK3I9rZcKuXce5QO3XdQ5f7TwFeRJR8!'
         }
     },
     buildUrl:function( path,params ){

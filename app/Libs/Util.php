@@ -314,6 +314,12 @@ class Util{
     public static function getUUID(){
         return (string) Str::uuid();
     }
+    public static function randCode($len=32){
+        $str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';//62个字符
+        $str = str_shuffle($str);
+        $str = substr($str,0,$len);
+        return $str;
+    }
     public static function getLoginToken($ip, $userInfo){
         $str = $ip.$userInfo->uuid.$userInfo->password;
         return md5($str)."#".$userInfo->id;
