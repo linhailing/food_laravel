@@ -10,6 +10,7 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Libs\Util;
+use App\Libs\WechatHandle;
 use App\Libs\WeChatPay;
 use App\Models\Model;
 
@@ -85,5 +86,42 @@ class MemberController extends ApiController{
             }
         }
         return $this->json(['order_list'=>$order_list]);
+    }
+    //用户登录
+    public function memberLogin(){
+        $code = $this->req('code', '');
+        if (empty($code)) return $this->error('需要code', 210);
+        //通过code获取用户openid
+        $wechatHandle = new WechatHandle();
+        $openid = $wechatHandle->getWeChatOpenId($code);
+        if (empty($openid)) return $this->error('调用微信出错', 210);
+        $nickName = $this->req('nickName', '');
+        $gender = $this->req('gender', '');
+        $avatarUrl = $this->req('avatarUrl', '');
+        if (empty($nickName) || empty($gender) || empty($avatarUrl)) return $this->error('调用微信出错', 210);
+        $member = [];
+        $member['nickname'] = $nickName;
+        $member['sex'] = $gender;
+        $member['avatar'] = $avatarUrl;
+        $result = Model::Member()->checkMemberOrUpdateMember($member, $openid);
+        if (empty($result)) return $this->error('调用微信出错', 210);
+        $token = Util::makePkey($result->id,time(), $result->salt);
+        $data = ['token'=>$token];
+        return $this->json($data);
+    }
+    //检查用户是否注册
+    public function memberCheckReg(){
+        $code = $this->req('code', '');
+        if (empty($code)) return $this->error('需要code', 210);
+        //通过code获取用户openid
+        $wechatHandle = new WechatHandle();
+        $openid = $wechatHandle->getWeChatOpenId($code);
+        if (empty($openid)) return $this->error('调用微信出错', 210);
+        $bind_info = Model::Member()->getOauthMemberBindByOpenId($openid);
+        if (empty($bind_info)) return $this->error('未绑定', 210);
+        $member_info = Model::Member()->getMemberById($bind_info->member_id);
+        if (empty($member_info)) return $this->error('未查询到绑定信息',210);
+        $token = Util::makePkey($member_info->id, time(), $member_info->salt);
+        return $this->json(['token'=>$token]);
     }
 }

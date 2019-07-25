@@ -5,7 +5,8 @@ Page({
   data: {
     remind: '加载中',
     angle: 0,
-    userInfo: {}
+    userInfo: {},
+    regFlag: true
   },
   goToIndex:function(){
     wx.switchTab({
@@ -16,6 +17,7 @@ Page({
     wx.setNavigationBarTitle({
       title: app.globalData.shopName
     })
+    this.checkLogin()
   },
   onShow:function(){
 
@@ -37,5 +39,77 @@ Page({
         });
       }
     });
+  },
+  checkLogin:function(){
+    var that = this;
+     wx.login({
+         success:function( res ){
+             if( !res.code ){
+                app.alert( { 'content':'登录失败，请再次点击~~' } );
+                return;
+             }
+             app.loading()
+             wx.request({
+                url:app.buildUrl( '/v1/member/checkReg' ),
+                header:app.getRequestHeader(),
+                method:'POST',
+                data:{ code:res.code },
+                success:function( res ){
+                  app.hideLoading()
+                    if( res.data.code != 200 ){
+                        that.setData({
+                            regFlag:false
+                        });
+                        return;
+                    }
+                    app.setCache( "token",res.data.results.token );
+                    //that.goToIndex();
+                }
+            });
+         }
+     });
+  },
+  login: function(e){
+    let that = this
+    let data = e.detail.userInfo
+    if(!data){
+      app.alert({ 'content':'登录失败，请再次点击~~' })
+      return
+    }
+    wx.login({
+      success: function(res){
+        if(!res.code){
+          app.alert({'content': '登录失败，请再次点击~~'})
+          return
+        }
+        data['code'] = res.code
+        app.loading()
+        wx.request({
+          url: app.buildUrl('/v1/member/login'),
+          data: data,
+          method: 'POST', // OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
+          header: app.getRequestHeader(), // 设置请求的 header
+          success: function(res){
+            // success
+            app.hideLoading()
+            if( res.data.code != 200 ){
+              app.alert( { 'content':res.data.msg } );
+              return;
+            }
+            app.setCache( "token",res.data.results.token );
+            that.goToIndex();
+          },
+          fail: function() {
+            app.hideLoading()
+            // fail
+          }
+        })
+      },
+      fail: function() {
+        // fail
+        app.alert({'content': '登录失败，请再次点击~~'})
+        return
+      }
+    })
   }
 });

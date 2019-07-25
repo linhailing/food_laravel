@@ -62,7 +62,7 @@ App({
     getRequestHeader:function(){
         return {
             'content-type': 'application/x-www-form-urlencoded',
-            'Authorization': 'a7vn9RWikyuQrMNGvM2Dn8Ugd3pmE8mngOKIVvs6ZUfEmLw37blKwtv9ASst7D0pjkx.phrtJR2JlK3I9rZcKuXce5QO3XdQ5f7TwFeRJR8!'
+            'Authorization': this.getCache( "token" )
         }
     },
     buildUrl:function( path,params ){
@@ -76,4 +76,18 @@ App({
         }
         return url + _paramUrl;
     },
+    getCache:function( key ){
+        var value = undefined;
+        try {
+            value = wx.getStorageSync( key );
+        } catch (e) {
+        }
+        return value;
+    },
+    setCache:function(key,value){
+        wx.setStorage({
+             key:key,
+            data:value
+        });
+    }
 });

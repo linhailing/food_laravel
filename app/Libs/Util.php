@@ -109,8 +109,8 @@ class Util{
     }
 
     //生成sessionKey
-    public static function makePkey($uid, $timestamp, $tel) {
-        $pkey = array('u' => $uid, 'time' => $timestamp, 'phone' => $tel);
+    public static function makePkey($uid, $timestamp, $salt) {
+        $pkey = array('u' => $uid, 'time' => $timestamp, 'salt' => $salt);
         $pkey = Util::up_encode($pkey);
         return $pkey;
     }
