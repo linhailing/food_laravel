@@ -199,12 +199,15 @@ class OrderController extends ApiController{
 
     //订单支付
     public function orderPay(){
+        if ($this->checkLogin()) return $this->checkLogin();
         $uid = $this->uid ?? 0;
         $order_sn = $this->req('order_sn', 0);
         if (empty($order_sn)) return $this->error('系统繁忙。请稍后再试~~', 210);
         $orderPay = Model::Food()->getOrderPayByOrderSnUid($uid, $order_sn);
         if (empty($orderPay)) return $this->error('系统繁忙。请稍后再试~~', 210);
         //获取个人oppid
+        $member_bind = Model::Member()->getOauthMemberBindByMemberId($uid);
+        if (empty($member_bind)) return $this->error('系统繁忙。请稍后再试~~', 210);
         $notify_url = $GLOBALS['domain_api'] . $GLOBALS['mina_app']['callback_url'];
         //微信支付
         $target_wechat = new WeChatPay();
@@ -217,13 +220,17 @@ class OrderController extends ApiController{
             'total_fee'=> intval( $orderPay->total_price * 100 ),
             'notify_url'=> $notify_url,
             'trade_type'=> "JSAPI",
-            'openid'=> '1233455555'
+            'openid'=> $member_bind->openid
         ];
         $pay_info = $target_wechat->get_pay_info($data);
         if (empty($pay_info)) return $this->error('系统繁忙。请稍后再试~~', 210);
         if ($pay_info['code'] != 200){
             return $this->error($pay_info['msg'], 210);
         }
+        // #保存prepay_id为了后面发模板消息
+        $updatePayOrder = [];
+        $updatePayOrder['prepay_id'] = isset($pay_info['prepay_id']) ? $pay_info['prepay_id'] : '';
+        Model::Member()->updatePayOrderByOrderSn($order_sn, $updatePayOrder);
         return $this->json($pay_info);
     }
     //支付回调

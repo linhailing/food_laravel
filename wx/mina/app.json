@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/editor/index",
     "pages/index/index",
     "pages/my/order_list",
     "pages/cart/index",

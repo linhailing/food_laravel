@@ -41,11 +41,11 @@ $GLOBALS['domain'] = 'http://192.168.1.177:9997';
 $GLOBALS['domain_api'] = 'http://192.168.1.177:9997/api/';
 
 $GLOBALS['mina_app'] = [
-    'appid' => 'wx1827441685a43f5e',
-    'appkey' => '11e24afc14308b568c66ad0539c40725',
-    'paykey' => 'xxxxxxxx',
-    'mch_id' =>'xxxxxxxxxxxx换自己的',
-    'callback_url' => '/vi/order/callback'
+    'appid' => env('APPID',''),
+    'appkey' => env('APPKEY',''),
+    'paykey' => env('PAYKEY',''),
+    'mch_id' =>env('MCHID',''),
+    'callback_url' => env('CALLBACKUR','')
 ];
 
 //支付状态

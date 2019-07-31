@@ -1,17 +1,31 @@
 //获取应用实例
 var app = getApp();
 Page({
-    data: {},
-    onLoad() {
-
+    data: {
+        user_info: []
     },
+    onLoad() {},
     onShow() {
         let that = this;
-        that.setData({
-            user_info: {
-                nickname: "编程浪子",
-                avatar_url: "/images/more/logo.png"
-            },
+        that.getUserInfo()
+    },
+    getUserInfo: function(){
+        let that = this
+        app.loading()
+        wx.request({
+            url: app.buildUrl('/v1/member'),
+            data: {},
+            header: app.getRequestHeader(), // 设置请求的 header
+            success: function(res){
+                app.hideLoading()
+                if(res.data.code != 200){
+                    app.alert({'content': res.data.msg,'code': res.data.code})
+                    return
+                }
+                that.setData({
+                    user_info: res.data.results.member
+                })
+            }
         })
     }
 });

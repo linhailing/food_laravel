@@ -18,11 +18,17 @@ class Member extends Model{
     public function insertOauthMemberBind($data){
         return self::table('oauth_member_bind')->insertGetId($data);
     }
+    public function getOauthMemberBindByMemberId($member_id){
+        return self::table('oauth_member_bind')->where(['member_id'=>$member_id])->first();
+    }
     public function getMemberById($id=0){
         return self::table('member')->where(['id'=>$id])->first();
     }
     public function insertMember($data){
         return self::table('member')->insertGetId($data);
+    }
+    public function updatePayOrderByOrderSn($order_sn, $data=[]){
+        return self::table('pay_order')->where(['order_sn'=>$order_sn])->update($data);
     }
     //判断用户是否注册或已经注册,返回注册用户信息
     public function checkMemberOrUpdateMember($member=[], $openid=''){

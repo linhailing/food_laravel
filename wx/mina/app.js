@@ -30,11 +30,18 @@ App({
     alert:function( params ){
         var title = params.hasOwnProperty('title')?params['title']:'提示信息';
         var content = params.hasOwnProperty('content')?params['content']:'';
+        let code = params.hasOwnProperty('code') ? params['code']: 200
         wx.showModal({
             title: title,
             content: content,
             showCancel:false,
             success: function(res) {
+                if((code != 200) && code == 422){
+                    wx.redirectTo({
+                        url: '/pages/index/index',
+                    });
+                    return
+                }
                 if (res.confirm) {//用户点击确定
                     if( params.hasOwnProperty('cb_confirm') && typeof( params.cb_confirm ) == "function" ){
                         params.cb_confirm(params.hasOwnProperty('cb_confirm'));
@@ -62,6 +69,12 @@ App({
     getRequestHeader:function(){
         return {
             'content-type': 'application/x-www-form-urlencoded',
+            'Authorization': this.getCache( "token" )
+        }
+    },
+    getUploadFileHeader:function(){
+        return {
+            'content-type': 'multipart/form-data',
             'Authorization': this.getCache( "token" )
         }
     },

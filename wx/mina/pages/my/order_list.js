@@ -33,6 +33,7 @@ Page({
     toPay: function(e){
         let order_sn = e.currentTarget.dataset.id
         let that = this
+        app.loading()
         wx.request({
             url: app.buildUrl('/v1/order/pay'),
             header: app.getRequestHeader(),
@@ -41,12 +42,24 @@ Page({
                 'order_sn': order_sn
             },
             success: function (res) {
+                app.hideLoading()
                 let resp = res.data;
                 if (resp.code != 200) {
                     app.alert({"content": resp.msg});
                     return;
                 }
-                app.console(resp)
+                let pay_info = resp.results;
+                wx.requestPayment({
+                    'timeStamp': pay_info.timeStamp,
+                    'nonceStr': pay_info.nonceStr,
+                    'package': pay_info.package,
+                    'signType': 'MD5',
+                    'paySign': pay_info.paySign,
+                    'success': function (res) {
+                    },
+                    'fail': function (res) {
+                    }
+                });
             }
         })
     },

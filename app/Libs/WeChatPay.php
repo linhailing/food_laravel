@@ -15,12 +15,30 @@ class WeChatPay{
         $this->config = $GLOBALS['mina_app'];
     }
     // 生成签名
-    public function create_sign($pay_data = []){
+    public function create_sign($pay_data = [], $isencode = false){
+        /***
         ksort($pay_data);
         $stringA = http_build_query($pay_data);
         $stringSignTemp = $stringA.'&key='.$this->config['paykey'];
+        dd($stringSignTemp);
         $sign = strtoupper(md5($stringSignTemp));
         return $sign;
+        ***/
+        $paramStr = '';
+        ksort($pay_data);
+        $i = 0;
+        foreach ($pay_data as $key => $value) {
+            if ($key == 'Signature'){ continue;}
+            if ($i == 0){
+                $paramStr .= '';
+            }else{
+                $paramStr .= '&';
+            }
+            $paramStr .= $key . '=' . ($isencode ? urlencode($value) : $value);
+            ++$i;
+        }
+        $stringSignTemp=$paramStr."&key=".$this->config['paykey'];
+        return strtoupper(md5($stringSignTemp));
     }
     // 获取支付信息
     public function get_pay_info($pay_data = []){
@@ -51,12 +69,18 @@ class WeChatPay{
             $resp['msg'] = $result['err_code_des'] ?? '系统错误';
             return $resp;
         }
-        if ((isset($result['return_code']) && $result['return_code'] == 'SUCCESS') && (isset($result['result_code']) && $result['result_code'] == 'SUCCESS')){
-            return $result;
-        }
-        $resp['code']=210;
-        $resp['msg'] = '其他错误';
-        return $resp;
+        $pay_sign_data = [];
+        $pay_sign_data['appId'] = isset($result['appid']) ? $result['appid'] :'';
+        $pay_sign_data['timeStamp'] = "'".TIMESTAMP."'";
+        $pay_sign_data['nonceStr'] = isset($result['nonce_str']) ? $result['nonce_str'] :'';
+        $pay_sign_data['package'] = isset($result['prepay_id']) ? 'prepay_id='.$result['prepay_id'] :'';
+        $pay_sign_data['signType'] = 'MD5';
+        $pay_sign = $this->create_sign($pay_sign_data);
+        $pay_sign_data['paySign'] = $pay_sign;
+        $pay_sign_data['prepay_id'] = isset($result['prepay_id']) ? $result['prepay_id'] :'';
+        unset($pay_sign_data['appId']);
+        $pay_sign_data['code'] = 200;
+        return $pay_sign_data;
     }
     /**
      * XML编码

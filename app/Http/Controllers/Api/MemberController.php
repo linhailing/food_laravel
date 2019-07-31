@@ -15,6 +15,11 @@ use App\Libs\WeChatPay;
 use App\Models\Model;
 
 class MemberController extends ApiController{
+    public function index(){
+        if($this->checkLogin()) return $this->checkLogin();
+        $member = Model::Member()->getMemberById($this->uid);
+        return $this->json(['member'=>$member]);
+    }
     // 用户分享页面
     public function share(){
         $uid = $this->uid ?? 0;

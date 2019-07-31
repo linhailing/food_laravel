@@ -25,6 +25,7 @@ Route::namespace('Api')->prefix('v1')->middleware(['api','cors'])->group(functio
     Route::get('/food/category', 'FoodController@category');
     Route::get('/food/detail', 'FoodController@detail');
     //用户信息
+    Route::get('/member', 'MemberController@index');
     Route::post('/member/share', 'MemberController@share');
     Route::post('/member/login', 'MemberController@memberLogin');
     Route::post('/member/checkReg', 'MemberController@memberCheckReg');
@@ -40,4 +41,6 @@ Route::namespace('Api')->prefix('v1')->middleware(['api','cors'])->group(functio
     Route::post('/order/createOrder', 'OrderController@createOrder');
     Route::post('/order/pay', 'OrderController@orderPay');
     Route::any('/order/callback', 'OrderController@orderCallback');
+    //upload
+    Route::post('/upload/file', 'UploadFileController@uploadFile');
 });
